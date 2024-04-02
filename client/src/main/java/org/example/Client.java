@@ -2,6 +2,8 @@ package org.example;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.Duration;
+import java.time.LocalTime;
 
 public class Client {
     private Socket socket;                      //socket declaration.
@@ -9,12 +11,15 @@ public class Client {
     private BufferedWriter bufferedWriter;
 
     public static void main(String[] args) {
+        Client client = new Client();
         try{
-            Client client = new Client();
-            client.connect("localhost", 6969);
+            client.connect("localhost", 8000);
+            client.receive();
+            while(true){
 
+            }
         }catch (Exception e){
-            e.printStackTrace();
+            client.disconnect();
         }
     }
 
@@ -25,29 +30,23 @@ public class Client {
         System.out.println("Server connected: " + host + ":" + port);
     }
 
-    public void disconnect() throws IOException{
-        socket.close();
-        bufferedReader.close();
-        bufferedWriter.close();
+    public void disconnect(){
+        try{
+            socket.close();
+            bufferedReader.close();
+            bufferedWriter.close();
+        }catch (IOException e){
+            System.out.println("Unable to close connection");
+        }
     }
-    public void reciveMessage() throws IOException{
+    public void receive(){
         new Thread(() ->{
             while (!socket.isClosed()){
-                try {
+                try{
                     String message = bufferedReader.readLine();
-                    if (message != null){
-                        System.out.println("Message: " +message);
-                    }else {
-                        break;
-                    }
-                } catch (IOException e) {
-                    System.out.println("Error receiving message");
-                    try {
-                        disconnect();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    break;
+                    System.out.println("Message: " + message);
+                }catch (IOException e){
+                    disconnect();
                 }
             }
         }).start();
